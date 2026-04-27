@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller ETA 2026 · BREAD ART S.A.S.</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C0392B;
+    --red-dark: #922B21;
+    --orange: #E67E22;
+    --orange-light: #F39C12;
+    --green: #1E8449;
+    --green-light: #27AE60;
+    --bg: #1A0A00;
+    --bg2: #2C1200;
+    --card: #241000;
+    --card2: #331500;
+    --text: #F5E6D3;
+    --text-muted: #B5936A;
+    --white: #FFF8F0;
+    --border: #5C2800;
+    --correct: #27AE60;
+    --wrong: #C0392B;
+    --highlight: #F39C12;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--red-dark) 0%, #6E1A10 50%, var(--bg) 100%);
+    padding: 40px 24px 32px;
+    text-align: center;
+    border-bottom: 3px solid var(--orange);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, var(--orange) 0px, var(--orange) 20px, transparent 20px, transparent 30px);
+  }
+
+  .header-logo {
+    font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--orange-light);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(38px, 7vw, 72px);
+    letter-spacing: 2px;
+    line-height: 1;
+    color: var(--white);
+    text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    margin-bottom: 8px;
+  }
+
+  .header h1 span { color: var(--orange); }
+
+  .header-sub {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--bg2);
+    height: 6px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red), var(--orange));
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* SCORE PANEL */
+  .score-panel {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px 24px 0;
+    flex-wrap: wrap;
+  }
+
+  .score-chip {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .score-chip b { color: var(--white); font-size: 15px; }
+
+  /* SECTIONS */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 24px 8px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .section-label .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    background: rgba(230,126,34,0.12);
+    border: 1px solid rgba(230,126,34,0.3);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .section-label .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* QUESTION CARDS */
+  .questions-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 8px 24px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-card:hover { border-color: rgba(230,126,34,0.4); }
+
+  .q-card.answered-correct { border-color: var(--correct); box-shadow: 0 0 20px rgba(39,174,96,0.15); }
+  .q-card.answered-wrong { border-color: var(--wrong); box-shadow: 0 0 20px rgba(192,57,43,0.15); }
+  .q-card.answered-partial { border-color: var(--orange); box-shadow: 0 0 20px rgba(230,126,34,0.15); }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--orange);
+    line-height: 1;
+    min-width: 32px;
+  }
+
+  .q-meta { flex: 1; }
+
+  .q-type-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+
+  .badge-single { background: rgba(192,57,43,0.2); color: #E74C3C; border: 1px solid rgba(192,57,43,0.3); }
+  .badge-multi { background: rgba(39,174,96,0.15); color: #2ECC71; border: 1px solid rgba(39,174,96,0.3); }
+  .badge-open { background: rgba(52,152,219,0.15); color: #5DADE2; border: 1px solid rgba(52,152,219,0.3); }
+  .badge-image { background: rgba(155,89,182,0.15); color: #A569BD; border: 1px solid rgba(155,89,182,0.3); }
+  .badge-truefalse { background: rgba(230,126,34,0.15); color: var(--orange-light); border: 1px solid rgba(230,126,34,0.3); }
+
+  .q-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.5;
+  }
+
+  .q-body { padding: 16px 22px 20px; }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--card2);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .option:hover:not(.disabled) {
+    border-color: var(--orange);
+    background: rgba(230,126,34,0.08);
+  }
+
+  .option.selected:not(.show-result) {
+    border-color: var(--orange-light);
+    background: rgba(243,156,18,0.12);
+  }
+
+  .option.correct-answer {
+    border-color: var(--correct) !important;
+    background: rgba(39,174,96,0.12) !important;
+  }
+
+  .option.wrong-answer {
+    border-color: var(--wrong) !important;
+    background: rgba(192,57,43,0.1) !important;
+  }
+
+  .option.disabled { cursor: default; }
+
+  .option-indicator {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+
+  .option-indicator.square { border-radius: 5px; }
+
+  .option.selected .option-indicator { border-color: var(--orange-light); color: var(--orange-light); background: rgba(243,156,18,0.15); }
+  .option.correct-answer .option-indicator { border-color: var(--correct); color: var(--correct); background: rgba(39,174,96,0.2); }
+  .option.wrong-answer .option-indicator { border-color: var(--wrong); color: var(--wrong); background: rgba(192,57,43,0.15); }
+
+  .option-text { font-size: 14px; color: var(--text); line-height: 1.45; }
+
+  /* IMAGE ANALYSIS */
+  .scenario-image {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--card2);
+  }
+
+  .scenario-svg-wrap { padding: 20px; }
+
+  /* OPEN TEXT */
+  .open-answer {
+    width: 100%;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 90px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .open-answer:focus { border-color: var(--orange); }
+  .open-answer::placeholder { color: var(--text-muted); }
+  .open-answer:disabled { opacity: 0.6; }
+
+  /* SUBMIT BUTTON */
+  .submit-btn {
+    margin-top: 12px;
+    padding: 9px 20px;
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .submit-btn:hover:not(:disabled) { 
+    background: linear-gradient(135deg, var(--orange), var(--red));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(192,57,43,0.4);
+  }
+
+  .submit-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+  /* FEEDBACK */
+  .feedback {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.correct { background: rgba(39,174,96,0.12); border: 1px solid rgba(39,174,96,0.3); color: #58D68D; }
+  .feedback.partial { background: rgba(230,126,34,0.12); border: 1px solid rgba(230,126,34,0.3); color: #F0B27A; }
+  .feedback.wrong { background: rgba(192,57,43,0.12); border: 1px solid rgba(192,57,43,0.3); color: #F1948A; }
+  .feedback.info { background: rgba(52,152,219,0.1); border: 1px solid rgba(52,152,219,0.25); color: #7FB3D3; }
+
+  .feedback strong { display: block; margin-bottom: 4px; font-size: 14px; }
+  .feedback-icon { font-size: 18px; margin-right: 6px; }
+
+  /* TRUE/FALSE */
+  .tf-options { display: flex; gap: 10px; }
+  .tf-btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--card2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .tf-btn:hover:not(.disabled) { border-color: var(--orange); background: rgba(230,126,34,0.08); }
+  .tf-btn.selected { border-color: var(--orange-light); background: rgba(243,156,18,0.12); }
+  .tf-btn.correct-answer { border-color: var(--correct) !important; background: rgba(39,174,96,0.12) !important; }
+  .tf-btn.wrong-answer { border-color: var(--wrong) !important; background: rgba(192,57,43,0.1) !important; }
+  .tf-btn.disabled { cursor: default; }
+
+  /* FINAL RESULTS */
+  .final-results {
+    display: none;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+    animation: fadeUp 0.6s ease;
+  }
+
+  .final-results.show { display: block; }
+
+  .result-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .result-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 96px;
+    line-height: 1;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--orange), var(--red));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .result-label {
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 24px;
+  }
+
+  .result-breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .rb-item {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    min-width: 100px;
+  }
+
+  .rb-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  .rb-num.g { color: var(--correct); }
+  .rb-num.o { color: var(--orange); }
+  .rb-num.r { color: var(--wrong); }
+
+  .rb-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .result-message {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .result-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto 28px;
+  }
+
+  .retry-btn {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, var(--red), var(--orange));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(192,57,43,0.4); }
+
+  /* DIVIDER */
+  .divider-text {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 2px;
+    padding: 8px 0 4px;
+  }
+
+  /* TEMP ZONES SVG */
+  .temp-diagram { width: 100%; max-width: 480px; margin: 0 auto 14px; display: block; }
+
+  /* SCENARIO CARD */
+  .scenario-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .scenario-box strong { color: var(--orange-light); }
+  .scenario-box .scene-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* FINAL SUBMIT */
+  .final-submit-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 32px;
+    text-align: center;
+  }
+
+  .final-submit-btn {
+    padding: 16px 48px;
+    background: linear-gradient(135deg, var(--orange), var(--red));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.25s;
+    box-shadow: 0 4px 20px rgba(192,57,43,0.3);
+  }
+
+  .final-submit-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(192,57,43,0.5); }
+  .final-submit-btn:disabled { opacity: 0.4; transform: none; cursor: not-allowed; }
+
+  .instruction-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  /* HOTSPOT IMAGE */
+  .hotspot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .hotspot-item {
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .hotspot-item:hover:not(.disabled) { border-color: var(--orange); background: rgba(230,126,34,0.08); }
+  .hotspot-item .emoji { font-size: 28px; display: block; margin-bottom: 6px; }
+  .hotspot-item .label { font-weight: 600; display: block; margin-bottom: 3px; }
+  .hotspot-item .desc { font-size: 11px; color: var(--text-muted); }
+  .hotspot-item.selected { border-color: var(--orange-light); background: rgba(243,156,18,0.1); }
+  .hotspot-item.correct-answer { border-color: var(--correct); background: rgba(39,174,96,0.1); }
+  .hotspot-item.wrong-answer { border-color: var(--wrong); background: rgba(192,57,43,0.08); }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 36px; }
+    .questions-container { padding: 8px 14px 60px; }
+    .score-panel { gap: 10px; }
+    .hotspot-grid { grid-template-columns: 1fr 1fr; }
+    .result-score { font-size: 72px; }
+    .result-card { padding: 28px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">BREAD ART S.A.S. · Área de Calidad · 2026</div>
+  <h1>TALLER <span>ETA</span></h1>
+  <div class="header-sub">Enfermedades Transmitidas por Alimentos · Plan de Capacitación Anual</div>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+</div>
+
+<div class="score-panel">
+  <div class="score-chip">🎯 Progreso: <b id="progressText">0 / 12</b></div>
+  <div class="score-chip">✅ Correctas: <b id="correctCount" style="color:#27AE60">0</b></div>
+  <div class="score-chip">❌ Incorrectas: <b id="wrongCount" style="color:#E74C3C">0</b></div>
+</div>
+
+<!-- ====== SECCIÓN 1 ====== -->
+<div class="section-label">
+  <span class="tag">Sección 1 · Conceptos Fundamentales</span>
+  <div class="line"></div>
+</div>
+
+<div class="questions-container">
+
+  <!-- Q1: Opción única -->
+  <div class="q-card" id="q1">
+    <div class="q-header">
+      <div class="q-num">01</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-single">● Única respuesta</span>
+        <div class="q-text">¿Qué es una Enfermedad Transmitida por Alimentos (ETA)?</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-type="single" data-correct="b">
+        <div class="option" data-val="a">
+          <div class="option-indicator">A</div>
+          <div class="option-text">Una enfermedad que solo se contagia de persona a persona por contacto directo.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator">B</div>
+          <div class="option-text">Una enfermedad que ocurre cuando una persona consume alimentos o agua contaminados con microorganismos, toxinas o agentes químicos.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator">C</div>
+          <div class="option-text">Una enfermedad exclusiva de los niños pequeños causada por bacterias en el agua.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator">D</div>
+          <div class="option-text">Una infección que solo puede ocurrir en la etapa de distribución del alimento.</div>
+        </div>
+      </div>
+      <div class="feedback" id="fb1"></div>
+    </div>
+  </div>
+
+  <!-- Q2: Verdadero/Falso -->
+  <div class="q-card" id="q2">
+    <div class="q-header">
+      <div class="q-num">02</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-truefalse">◆ Verdadero / Falso</span>
+        <div class="q-text">La contaminación de los alimentos solo puede ocurrir durante la etapa de producción en la planta.</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="tf-options" data-correct="falso">
+        <button class="tf-btn" data-val="verdadero">✓ VERDADERO</button>
+        <button class="tf-btn" data-val="falso">✗ FALSO</button>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </div>
+  </div>
+
+  <!-- Q3: Múltiple respuesta -->
+  <div class="q-card" id="q3">
+    <div class="q-header">
+      <div class="q-num">03</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-multi">■ Múltiple respuesta</span>
+        <div class="q-text">¿Cuáles de las siguientes son fuentes de contaminación de los alimentos? (Selecciona TODAS las correctas)</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-type="multi" data-correct="a,b,d">
+        <div class="option" data-val="a">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Manos sucias del manipulador durante la producción.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Agua contaminada usada en el proceso.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">El uso de cofia y tapabocas correctamente puestos.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Transporte inadecuado con temperaturas incorrectas.</div>
+        </div>
+        <div class="option" data-val="e">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Registrar la temperatura de los procesos en planillas.</div>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="checkMulti('q3','fb3')">Verificar respuesta</button>
+      <div class="feedback" id="fb3"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====== SECCIÓN 2 ====== -->
+<div class="section-label">
+  <span class="tag">Sección 2 · Bacterias y Riesgos</span>
+  <div class="line"></div>
+</div>
+
+<div class="questions-container">
+
+  <!-- Q4: Análisis visual - temperatura -->
+  <div class="q-card" id="q4">
+    <div class="q-header">
+      <div class="q-num">04</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-image">◉ Análisis de imagen</span>
+        <div class="q-text">Observa el diagrama de zonas de temperatura. ¿En qué rango se encuentra la ZONA DE PELIGRO donde los gérmenes crecen más rápido?</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <!-- SVG Temperature Diagram -->
+      <svg class="temp-diagram" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background -->
+        <rect width="400" height="200" fill="#1A0A00" rx="10"/>
+        <!-- Safe cold zone -->
+        <rect x="20" y="140" width="360" height="42" fill="#1A3A5C" rx="6"/>
+        <text x="200" y="157" text-anchor="middle" fill="#5DADE2" font-size="12" font-family="DM Sans, sans-serif" font-weight="700">❄ MENOS DE 5°C — ZONA SEGURA (gérmenes duermen)</text>
+        <text x="200" y="173" text-anchor="middle" fill="#85C1E9" font-size="10" font-family="DM Sans, sans-serif">Refrigeración / Congelación</text>
+        <!-- Danger zone -->
+        <rect x="20" y="68" width="360" height="64" fill="#5D0A00" rx="6"/>
+        <rect x="20" y="68" width="360" height="64" fill="url(#dangerGrad)" rx="6"/>
+        <defs>
+          <linearGradient id="dangerGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#C0392B" stop-opacity="0.4"/>
+            <stop offset="50%" stop-color="#E74C3C" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#C0392B" stop-opacity="0.4"/>
+          </linearGradient>
+        </defs>
+        <text x="200" y="90" text-anchor="middle" fill="#FF6B6B" font-size="13" font-family="DM Sans, sans-serif" font-weight="700">⚠ 5°C — 60°C</text>
+        <text x="200" y="108" text-anchor="middle" fill="#FAD7A0" font-size="14" font-family="Bebas Neue, sans-serif" letter-spacing="2">ZONA DE PELIGRO</text>
+        <text x="200" y="124" text-anchor="middle" fill="#F1948A" font-size="10" font-family="DM Sans, sans-serif">¡Los gérmenes se MULTIPLICAN rápidamente!</text>
+        <!-- Safe hot zone -->
+        <rect x="20" y="18" width="360" height="42" fill="#6E2800" rx="6"/>
+        <text x="200" y="35" text-anchor="middle" fill="#E67E22" font-size="12" font-family="DM Sans, sans-serif" font-weight="700">🔥 MÁS DE 60°C — ZONA SEGURA (gérmenes mueren)</text>
+        <text x="200" y="51" text-anchor="middle" fill="#FAD7A0" font-size="10" font-family="DM Sans, sans-serif">Cocción / Pasteurización</text>
+        <!-- Arrows -->
+        <text x="5" y="45" fill="#E67E22" font-size="14">↑</text>
+        <text x="5" y="100" fill="#E74C3C" font-size="14">⚡</text>
+        <text x="5" y="162" fill="#5DADE2" font-size="14">↓</text>
+      </svg>
+
+      <div class="options" data-type="single" data-correct="c">
+        <div class="option" data-val="a">
+          <div class="option-indicator">A</div>
+          <div class="option-text">Entre 0°C y 4°C — zona de refrigeración.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator">B</div>
+          <div class="option-text">Por encima de 60°C — zona de cocción.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator">C</div>
+          <div class="option-text">Entre 5°C y 60°C — zona donde los gérmenes crecen rápidamente.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator">D</div>
+          <div class="option-text">Entre -18°C y 0°C — zona de congelación profunda.</div>
+        </div>
+      </div>
+      <div class="feedback" id="fb4"></div>
+    </div>
+  </div>
+
+  <!-- Q5: Asociación bacteria-síntoma -->
+  <div class="q-card" id="q5">
+    <div class="q-header">
+      <div class="q-num">05</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-single">● Única respuesta</span>
+        <div class="q-text">El Clostridium Botulinum es especialmente peligroso en panadería porque...</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-type="single" data-correct="d">
+        <div class="option" data-val="a">
+          <div class="option-indicator">A</div>
+          <div class="option-text">Produce síntomas en menos de 1 hora y solo causa diarrea leve.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator">B</div>
+          <div class="option-text">Solo se encuentra en carnes crudas y no afecta productos de panadería.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator">C</div>
+          <div class="option-text">Se elimina fácilmente con el lavado de manos y la refrigeración normal.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator">D</div>
+          <div class="option-text">Crece en ambientes sin oxígeno (empaques al vacío), no tiene olor ni cambio visible, y puede causar parálisis y muerte.</div>
+        </div>
+      </div>
+      <div class="feedback" id="fb5"></div>
+    </div>
+  </div>
+
+  <!-- Q6: Múltiple - síntomas ETA -->
+  <div class="q-card" id="q6">
+    <div class="q-header">
+      <div class="q-num">06</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-multi">■ Múltiple respuesta</span>
+        <div class="q-text">¿Cuáles son síntomas de una ETA que deben alertar al operario? (Selecciona TODOS los que apliquen)</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-type="multi" data-correct="a,b,c,e">
+        <div class="option" data-val="a">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Náuseas y vómitos repentinos.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Diarrea y cólicos intensos.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Fiebre y deshidratación.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Cansancio por trabajar muchas horas seguidas sin descansar.</div>
+        </div>
+        <div class="option" data-val="e">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Malestar estomacal persistente.</div>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="checkMulti('q6','fb6')">Verificar respuesta</button>
+      <div class="feedback" id="fb6"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====== SECCIÓN 3 ====== -->
+<div class="section-label">
+  <span class="tag">Sección 3 · Análisis de Escenarios</span>
+  <div class="line"></div>
+</div>
+
+<div class="questions-container">
+
+  <!-- Q7: Escenario + análisis -->
+  <div class="q-card" id="q7">
+    <div class="q-header">
+      <div class="q-num">07</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-image">◉ Análisis de escenario</span>
+        <div class="q-text">Lee el siguiente escenario y determina qué error ocurrió y qué bacteria representa el mayor riesgo.</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="scenario-box">
+        <span class="scene-tag">📋 Escenario — Turno de la tarde</span>
+        María termina de limpiar el baño y regresa inmediatamente a la línea de producción sin lavarse las manos. Empieza a preparar la crema pastelera para los croissants y la deja lista sobre la mesa durante 3 horas mientras termina otras tareas. La crema quedó a temperatura ambiente durante todo ese tiempo.
+      </div>
+      <!-- Visual diagram -->
+      <svg viewBox="0 0 480 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;margin-bottom:14px;border-radius:8px;overflow:hidden;">
+        <rect width="480" height="100" fill="#1A0A00"/>
+        <!-- Steps -->
+        <rect x="10" y="15" width="90" height="70" fill="#5D0A00" rx="6"/>
+        <text x="55" y="40" text-anchor="middle" fill="#FF6B6B" font-size="20">🚽</text>
+        <text x="55" y="58" text-anchor="middle" fill="#FAD7A0" font-size="9" font-family="DM Sans,sans-serif">Limpia baño</text>
+        <text x="55" y="70" text-anchor="middle" fill="#F1948A" font-size="8" font-family="DM Sans,sans-serif">sin lavarse</text>
+        <text x="55" y="82" text-anchor="middle" fill="#F1948A" font-size="8" font-family="DM Sans,sans-serif">las manos</text>
+        <!-- Arrow -->
+        <text x="105" y="57" fill="#E74C3C" font-size="16">→</text>
+        <!-- Step 2 -->
+        <rect x="120" y="15" width="90" height="70" fill="#5D0A00" rx="6"/>
+        <text x="165" y="40" text-anchor="middle" fill="#FF6B6B" font-size="20">🥛</text>
+        <text x="165" y="58" text-anchor="middle" fill="#FAD7A0" font-size="9" font-family="DM Sans,sans-serif">Prepara crema</text>
+        <text x="165" y="70" text-anchor="middle" fill="#F1948A" font-size="8" font-family="DM Sans,sans-serif">con manos</text>
+        <text x="165" y="82" text-anchor="middle" fill="#F1948A" font-size="8" font-family="DM Sans,sans-serif">contaminadas</text>
+        <!-- Arrow -->
+        <text x="215" y="57" fill="#E74C3C" font-size="16">→</text>
+        <!-- Step 3 -->
+        <rect x="228" y="15" width="100" height="70" fill="#6E2800" rx="6"/>
+        <text x="278" y="40" text-anchor="middle" fill="#FF6B6B" font-size="20">⏰</text>
+        <text x="278" y="58" text-anchor="middle" fill="#FAD7A0" font-size="9" font-family="DM Sans,sans-serif">3 horas</text>
+        <text x="278" y="70" text-anchor="middle" fill="#FAD7A0" font-size="9" font-family="DM Sans,sans-serif">a temp.</text>
+        <text x="278" y="82" text-anchor="middle" fill="#FAD7A0" font-size="9" font-family="DM Sans,sans-serif">ambiente</text>
+        <!-- Arrow -->
+        <text x="333" y="57" fill="#E74C3C" font-size="16">→</text>
+        <!-- Result -->
+        <rect x="346" y="10" width="124" height="80" fill="#3D0000" rx="6" stroke="#C0392B" stroke-width="1.5"/>
+        <text x="408" y="36" text-anchor="middle" fill="#FF6B6B" font-size="22">☠</text>
+        <text x="408" y="54" text-anchor="middle" fill="#FAD7A0" font-size="10" font-family="DM Sans,sans-serif" font-weight="700">RIESGO ALTO</text>
+        <text x="408" y="67" text-anchor="middle" fill="#F1948A" font-size="9" font-family="DM Sans,sans-serif">Toxina formada</text>
+        <text x="408" y="79" text-anchor="middle" fill="#F1948A" font-size="9" font-family="DM Sans,sans-serif">en el alimento</text>
+      </svg>
+
+      <div class="options" data-type="single" data-correct="b">
+        <div class="option" data-val="a">
+          <div class="option-indicator">A</div>
+          <div class="option-text">El error fue no usar cofia. El mayor riesgo es Salmonella porque vino del baño.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator">B</div>
+          <div class="option-text">El error fue no lavarse las manos y dejar la crema más de 2 horas a temperatura ambiente. El mayor riesgo es Staphylococcus aureus, que se multiplica en cremas manipuladas sin higiene.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator">C</div>
+          <div class="option-text">El error fue preparar croissants sin tapabocas. El riesgo es Listeria porque crece en frío.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator">D</div>
+          <div class="option-text">No hay ningún error real; la crema pastelera no necesita refrigeración si se consume en el mismo día.</div>
+        </div>
+      </div>
+      <div class="feedback" id="fb7"></div>
+    </div>
+  </div>
+
+  <!-- Q8: Análisis visual - ingredientes riesgo -->
+  <div class="q-card" id="q8">
+    <div class="q-header">
+      <div class="q-num">08</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-image">◉ Análisis de imagen</span>
+        <div class="q-text">Identifica cuál de estos ingredientes representa el MAYOR riesgo de Salmonella en nuestra panadería y cuál es su medida de control correcta.</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="hotspot-grid" id="hotspotQ8">
+        <div class="hotspot-item" data-val="a" onclick="selectHotspot('hotspotQ8','a','fb8','a')">
+          <span class="emoji">🥚</span>
+          <span class="label">Huevos crudos</span>
+          <span class="desc">Principal fuente de Salmonella</span>
+        </div>
+        <div class="hotspot-item" data-val="b" onclick="selectHotspot('hotspotQ8','b','fb8','a')">
+          <span class="emoji">🌾</span>
+          <span class="label">Harina de trigo</span>
+          <span class="desc">Ingrediente seco base</span>
+        </div>
+        <div class="hotspot-item" data-val="c" onclick="selectHotspot('hotspotQ8','c','fb8','a')">
+          <span class="emoji">🍬</span>
+          <span class="label">Azúcar refinada</span>
+          <span class="desc">Ingrediente seco</span>
+        </div>
+        <div class="hotspot-item" data-val="d" onclick="selectHotspot('hotspotQ8','d','fb8','a')">
+          <span class="emoji">🧂</span>
+          <span class="label">Sal</span>
+          <span class="desc">Conservante natural</span>
+        </div>
+      </div>
+      <div class="feedback" id="fb8"></div>
+    </div>
+  </div>
+
+  <!-- Q9: Escenario protocolos -->
+  <div class="q-card" id="q9">
+    <div class="q-header">
+      <div class="q-num">09</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-single">● Única respuesta</span>
+        <div class="q-text">Carlos nota que una lata de relleno de atún está abombada (inflada). ¿Qué debe hacer según el protocolo de BREAD ART?</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="scenario-box">
+        <span class="scene-tag">📋 Escenario — Recepción de materias primas</span>
+        Al revisar el inventario de la mañana, Carlos encuentra una lata de relleno de atún con la tapa visiblemente abombada. El producto huele normal y no tiene cambios visibles en el contenido.
+      </div>
+      <div class="options" data-type="single" data-correct="c">
+        <div class="option" data-val="a">
+          <div class="option-indicator">A</div>
+          <div class="option-text">Usarla de todas formas porque huele normal y no hay cambios visibles en el producto.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator">B</div>
+          <div class="option-text">Abrirla para verificar si realmente está en mal estado antes de tomar una decisión.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator">C</div>
+          <div class="option-text">Detener inmediatamente su uso, separarla, etiquetarla como "RETENIDO – No usar" y reportar al área de Calidad.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator">D</div>
+          <div class="option-text">Guardarla en la nevera para que el frío elimine cualquier bacteria que pueda tener.</div>
+        </div>
+      </div>
+      <div class="feedback" id="fb9"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====== SECCIÓN 4 ====== -->
+<div class="section-label">
+  <span class="tag">Sección 4 · Higiene Personal y 5 Claves</span>
+  <div class="line"></div>
+</div>
+
+<div class="questions-container">
+
+  <!-- Q10: Múltiple - higiene -->
+  <div class="q-card" id="q10">
+    <div class="q-header">
+      <div class="q-num">10</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-multi">■ Múltiple respuesta</span>
+        <div class="q-text">¿En qué momentos es OBLIGATORIO lavarse las manos según las normas de higiene de BREAD ART? (Selecciona todas las correctas)</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-type="multi" data-correct="a,b,c,e">
+        <div class="option" data-val="a">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Antes de iniciar la jornada de trabajo y manipular alimentos.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Después de ir al baño.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Al cambiar de tarea o al tocar la cara o el cabello.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Solo al inicio del turno, una única vez.</div>
+        </div>
+        <div class="option" data-val="e">
+          <div class="option-indicator square">□</div>
+          <div class="option-text">Después de manipular materias primas crudas como huevos o carne.</div>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="checkMulti('q10','fb10')">Verificar respuesta</button>
+      <div class="feedback" id="fb10"></div>
+    </div>
+  </div>
+
+  <!-- Q11: Razonamiento analítico -->
+  <div class="q-card" id="q11">
+    <div class="q-header">
+      <div class="q-num">11</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-single">● Única respuesta · Razonamiento</span>
+        <div class="q-text">Un operario tiene una herida en la mano derecha con un vendaje. Según las normas, ¿cuál es la práctica CORRECTA?</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <div class="options" data-type="single" data-correct="b">
+        <div class="option" data-val="a">
+          <div class="option-indicator">A</div>
+          <div class="option-text">No puede trabajar en producción y debe esperar a que la herida sane completamente.</div>
+        </div>
+        <div class="option" data-val="b">
+          <div class="option-indicator">B</div>
+          <div class="option-text">Cubrir la herida con un vendaje bien asegurado y usar un guante de un color diferente sobre él, para que sea visible si cae al producto.</div>
+        </div>
+        <div class="option" data-val="c">
+          <div class="option-indicator">C</div>
+          <div class="option-text">Usar únicamente el vendaje y lavarse más seguido las manos como medida adicional.</div>
+        </div>
+        <div class="option" data-val="d">
+          <div class="option-indicator">D</div>
+          <div class="option-text">Trabajar normalmente porque las heridas pequeñas no representan un riesgo en panadería.</div>
+        </div>
+      </div>
+      <div class="feedback" id="fb11"></div>
+    </div>
+  </div>
+
+  <!-- Q12: Pregunta abierta -->
+  <div class="q-card" id="q12">
+    <div class="q-header">
+      <div class="q-num">12</div>
+      <div class="q-meta">
+        <span class="q-type-badge badge-open">✎ Respuesta abierta</span>
+        <div class="q-text">En tus propias palabras: ¿Por qué crees que es importante reportar cuando estás enfermo en lugar de quedarte callado y seguir trabajando? Menciona al menos DOS razones concretas relacionadas con las ETA.</div>
+      </div>
+    </div>
+    <div class="q-body">
+      <textarea class="open-answer" id="openQ12" placeholder="Escribe tu respuesta aquí... (Mínimo 2 razones concretas)" rows="4"></textarea>
+      <button class="submit-btn" onclick="checkOpen('q12','fb12','openQ12')">Enviar respuesta</button>
+      <div class="feedback" id="fb12"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FINAL SUBMIT -->
+<div class="final-submit-wrap" id="finalSubmitWrap">
+  <button class="final-submit-btn" id="finalSubmitBtn" onclick="showResults()" disabled>
+    VER RESULTADOS DEL TALLER
+  </button>
+  <div class="instruction-note">Responde todas las preguntas para ver tus resultados</div>
+</div>
+
+<!-- FINAL RESULTS -->
+<div class="final-results" id="finalResults">
+  <div class="result-card">
+    <div class="result-score" id="resultScore">0%</div>
+    <div class="result-label">PUNTAJE FINAL · TALLER ETA 2026</div>
+    <div class="result-breakdown" id="resultBreakdown"></div>
+    <div class="result-message" id="resultMessage"></div>
+    <div class="result-sub" id="resultSub"></div>
+    <button class="retry-btn" onclick="retryQuiz()">🔄 REINICIAR TALLER</button>
+  </div>
+</div>
+
+<script>
+const TOTAL_QUESTIONS = 12;
+let answered = {};
+let scores = { correct: 0, partial: 0, wrong: 0 };
+
+const FEEDBACKS = {
+  fb1: {
+    b: { type: 'correct', title: '✅ ¡Correcto!', text: 'Una ETA ocurre cuando se consumen alimentos o agua contaminados con microorganismos, toxinas o agentes químicos. Puede ocurrir en cualquier etapa: procesamiento, manipulación, distribución o venta.' },
+    wrong: { type: 'wrong', title: '❌ Incorrecto', text: 'La respuesta correcta es B. Las ETA ocurren al consumir alimentos o agua contaminados con microorganismos, toxinas o agentes químicos — en cualquier etapa de la cadena.' }
+  },
+  fb2: {
+    correct: { type: 'correct', title: '✅ ¡Correcto! Es FALSO.', text: 'La contaminación puede ocurrir en CUALQUIER etapa: desde la materia prima, pasando por producción, empaque, distribución y hasta el punto de venta. Por eso cada paso importa.' },
+    wrong: { type: 'wrong', title: '❌ Incorrecto.', text: 'La afirmación es FALSA. La contaminación puede ocurrir en cualquier etapa de la cadena: materia prima, producción, empaque, distribución y venta.' }
+  },
+  fb4: {
+    c: { type: 'correct', title: '✅ ¡Correcto!', text: 'La Zona de Peligro está entre 5°C y 60°C. En este rango los gérmenes se multiplican rápidamente. Un alimento NO debe permanecer más de 2 horas en esta zona.' },
+    wrong: { type: 'wrong', title: '❌ Incorrecto.', text: 'La Zona de Peligro es entre 5°C y 60°C. Por encima de 60°C los gérmenes mueren, y por debajo de 5°C "duermen" (no se multiplican activamente).' }
+  },
+  fb5: {
+    d: { type: 'correct', title: '✅ ¡Correcto!', text: 'El Clostridium Botulinum es el más peligroso: crece sin oxígeno (anaerobia), no produce olor ni cambio visible, su toxina es resistente al calor, y puede causar parálisis respiratoria y muerte.' },
+    wrong: { type: 'wrong', title: '❌ Incorrecto.', text: 'La respuesta es D. El Clostridium es especialmente peligroso porque crece en empaques al vacío sin dejar señales visibles, y su toxina puede causar parálisis nerviosa y muerte.' }
+  },
+  fb7: {
+    b: { type: 'correct', title: '✅ ¡Análisis correcto!', text: 'Exacto. Hay DOS errores: 1) No lavarse las manos después del baño → contaminación directa. 2) Dejar la crema más de 2 horas a temperatura ambiente (Zona de Peligro 5-60°C). El Staphylococcus aureus vive en las manos y forma toxinas en cremas a temperatura ambiente.' },
+    wrong: { type: 'wrong', title: '❌ Análisis incorrecto.', text: 'Los dos errores claves son: no lavarse las manos (el Staphylococcus vive en nuestras manos y nariz) y dejar la crema más de 2 horas fuera de temperatura controlada. La respuesta correcta es B.' }
+  },
+  fb9: {
+    c: { type: 'correct', title: '✅ ¡Protocolo correcto!', text: 'Una lata abombada indica probable presencia de Clostridium Botulinum que produce gas al crecer sin oxígeno. Recuerda: la toxina NO tiene olor ni cambio visible. Nunca la uses. El protocolo es: detener, separar, etiquetar "RETENIDO" y reportar a Calidad.' },
+    wrong: { type: 'wrong', title: '❌ Protocolo incorrecto.', text: 'Una lata abombada puede contener Clostridium Botulinum y toxina botulínica — la más peligrosa de todas las ETA. Que huela normal NO significa que sea segura. La acción correcta es C: separar, etiquetar y reportar.' }
+  },
+  fb11: {
+    b: { type: 'correct', title: '✅ ¡Correcto!', text: 'El protocolo correcto es: cubrir la herida con vendaje firme + usar un guante de color diferente sobre ella. El color diferente garantiza que si el guante o el vendaje cae al producto, sea visible y detectable fácilmente.' },
+    wrong: { type: 'wrong', title: '❌ Incorrecto.', text: 'La práctica correcta es B: vendaje firme + guante de color diferente (para que sea visible si cae al producto). El Staphylococcus vive en las heridas y puede contaminar los alimentos sin que lo notes.' }
+  }
+};
+
+// Attach single-choice listeners
+document.querySelectorAll('.options[data-type="single"]').forEach(optGroup => {
+  const qCard = optGroup.closest('.q-card');
+  const qId = qCard.id;
+  const feedbackId = 'fb' + qId.replace('q','');
+  const correct = optGroup.dataset.correct;
+
+  optGroup.querySelectorAll('.option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (optGroup.classList.contains('locked')) return;
+      optGroup.classList.add('locked');
+      const val = opt.dataset.val;
+      
+      optGroup.querySelectorAll('.option').forEach(o => {
+        o.classList.add('disabled');
+        if (o.dataset.val === correct) o.classList.add('correct-answer');
+      });
+
+      const fb = document.getElementById(feedbackId);
+      if (val === correct) {
+        opt.classList.add('correct-answer');
+        opt.querySelector('.option-indicator').textContent = '✓';
+        qCard.classList.add('answered-correct');
+        showFeedback(fb, 'correct', FEEDBACKS[feedbackId]?.[correct]?.title || '✅ ¡Correcto!', FEEDBACKS[feedbackId]?.[correct]?.text || '');
+        recordAnswer(qId, 'correct');
+      } else {
+        opt.classList.add('wrong-answer');
+        opt.querySelector('.option-indicator').textContent = '✗';
+        qCard.classList.add('answered-wrong');
+        showFeedback(fb, 'wrong', FEEDBACKS[feedbackId]?.wrong?.title || '❌ Incorrecto.', FEEDBACKS[feedbackId]?.wrong?.text || '');
+        recordAnswer(qId, 'wrong');
+      }
+    });
+  });
+});
+
+// Attach T/F listeners
+document.querySelectorAll('.tf-options').forEach(tfGroup => {
+  const qCard = tfGroup.closest('.q-card');
+  const qId = qCard.id;
+  const feedbackId = 'fb' + qId.replace('q','');
+  const correct = tfGroup.dataset.correct;
+
+  tfGroup.querySelectorAll('.tf-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (tfGroup.classList.contains('locked')) return;
+      tfGroup.classList.add('locked');
+      const val = btn.dataset.val;
+
+      tfGroup.querySelectorAll('.tf-btn').forEach(b => {
+        b.classList.add('disabled');
+        if (b.dataset.val === correct) b.classList.add('correct-answer');
+      });
+
+      const fb = document.getElementById(feedbackId);
+      if (val === correct) {
+        btn.classList.add('correct-answer');
+        qCard.classList.add('answered-correct');
+        showFeedback(fb, 'correct', FEEDBACKS[feedbackId]?.correct?.title || '✅ ¡Correcto!', FEEDBACKS[feedbackId]?.correct?.text || '');
+        recordAnswer(qId, 'correct');
+      } else {
+        btn.classList.add('wrong-answer');
+        qCard.classList.add('answered-wrong');
+        showFeedback(fb, 'wrong', FEEDBACKS[feedbackId]?.wrong?.title || '❌ Incorrecto.', FEEDBACKS[feedbackId]?.wrong?.text || '');
+        recordAnswer(qId, 'wrong');
+      }
+    });
+  });
+});
+
+// Multi-choice
+function checkMulti(qId, fbId) {
+  const qCard = document.getElementById(qId);
+  if (qCard.classList.contains('answered-correct') || qCard.classList.contains('answered-wrong') || qCard.classList.contains('answered-partial')) return;
+  
+  const optGroup = qCard.querySelector('.options[data-type="multi"]');
+  const correctArr = optGroup.dataset.correct.split(',');
+  const selected = Array.from(optGroup.querySelectorAll('.option.selected')).map(o => o.dataset.val);
+  
+  if (selected.length === 0) {
+    const fb = document.getElementById(fbId);
+    showFeedback(fb, 'info', '⚠ Selecciona al menos una opción.', 'Marca todas las respuestas que consideres correctas antes de verificar.');
+    return;
+  }
+
+  optGroup.querySelectorAll('.option').forEach(o => {
+    o.classList.add('disabled');
+    if (correctArr.includes(o.dataset.val)) {
+      o.classList.add('correct-answer');
+      o.querySelector('.option-indicator').textContent = '✓';
+    } else if (selected.includes(o.dataset.val)) {
+      o.classList.add('wrong-answer');
+      o.querySelector('.option-indicator').textContent = '✗';
+    }
+  });
+
+  qCard.querySelector('.submit-btn').disabled = true;
+
+  const correctSelected = selected.filter(v => correctArr.includes(v)).length;
+  const wrongSelected = selected.filter(v => !correctArr.includes(v)).length;
+  const missed = correctArr.length - correctSelected;
+  const fb = document.getElementById(fbId);
+
+  if (correctSelected === correctArr.length && wrongSelected === 0) {
+    qCard.classList.add('answered-correct');
+    showFeedback(fb, 'correct', '✅ ¡Perfecto! Seleccionaste todas las correctas.', `Identificaste las ${correctArr.length} respuestas correctas sin marcar ninguna incorrecta.`);
+    recordAnswer(qId, 'correct');
+  } else if (wrongSelected === 0 && missed > 0) {
+    qCard.classList.add('answered-partial');
+    showFeedback(fb, 'partial', `⚠ Parcialmente correcto. Te faltaron ${missed} respuesta(s).`, 'Tus selecciones son correctas, pero hay opciones adicionales que también debías marcar. Revisa las resaltadas en verde.');
+    recordAnswer(qId, 'partial');
+  } else {
+    qCard.classList.add('answered-wrong');
+    showFeedback(fb, 'wrong', '❌ Incorrecto.', `Marcaste ${wrongSelected} opción(es) incorrecta(s) y te faltaron ${missed} correcta(s). Las opciones correctas están resaltadas en verde.`);
+    recordAnswer(qId, 'wrong');
+  }
+}
+
+// Multi-select toggle
+document.querySelectorAll('.options[data-type="multi"] .option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    if (opt.classList.contains('disabled')) return;
+    opt.classList.toggle('selected');
+    const ind = opt.querySelector('.option-indicator');
+    ind.textContent = opt.classList.contains('selected') ? '✓' : '□';
+  });
+});
+
+// Hotspot
+function selectHotspot(containerId, val, fbId, correct) {
+  const container = document.getElementById(containerId);
+  if (container.classList.contains('locked')) return;
+  container.classList.add('locked');
+  const qCard = container.closest('.q-card');
+  const qId = qCard.id;
+
+  container.querySelectorAll('.hotspot-item').forEach(item => {
+    item.onclick = null;
+    item.style.cursor = 'default';
+    if (item.dataset.val === correct) item.classList.add('correct-answer');
+    else if (item.dataset.val === val && val !== correct) item.classList.add('wrong-answer');
+  });
+
+  const fb = document.getElementById(fbId);
+  if (val === correct) {
+    qCard.classList.add('answered-correct');
+    showFeedback(fb, 'correct', '✅ ¡Correcto! Los huevos crudos son la principal fuente de Salmonella.', 
+      'Control correcto: romper los huevos siempre en un recipiente separado antes de mezclarlos, refrigerarlos correctamente y nunca usarlos si tienen la cáscara rota o sucia.');
+    recordAnswer(qId, 'correct');
+  } else {
+    qCard.classList.add('answered-wrong');
+    showFeedback(fb, 'wrong', '❌ El ingrediente de mayor riesgo son los HUEVOS CRUDOS.', 
+      'Los huevos crudos son la principal fuente de Salmonella en panadería. Ingredientes secos como harina, azúcar y sal tienen un riesgo mucho menor, aunque no cero.');
+    recordAnswer(qId, 'wrong');
+  }
+}
+
+// Open question
+function checkOpen(qId, fbId, textareaId) {
+  const qCard = document.getElementById(qId);
+  if (qCard.classList.contains('answered-correct')) return;
+  const textarea = document.getElementById(textareaId);
+  const val = textarea.value.trim();
+  
+  if (val.length < 20) {
+    showFeedback(document.getElementById(fbId), 'info', '⚠ Respuesta muy corta.', 'Por favor desarrolla tu respuesta con al menos 2 razones concretas relacionadas con las ETA.');
+    return;
+  }
+
+  textarea.disabled = true;
+  qCard.querySelector('.submit-btn').disabled = true;
+  qCard.classList.add('answered-correct');
+  const fb = document.getElementById(fbId);
+  showFeedback(fb, 'correct', '✅ Respuesta registrada.', 
+    'Respuesta modelo: 1) Al trabajar enfermo puedo contaminar los alimentos con bacterias como Staphylococcus (que vive en la nariz y garganta) o con virus, generando una ETA que puede enfermar a decenas de clientes. 2) Los grupos vulnerables (niños, adultos mayores, embarazadas) pueden desarrollar complicaciones graves o incluso morir. Reportar NO es una falta — ocultarlo SÍ lo es.');
+  recordAnswer(qId, 'correct');
+}
+
+function showFeedback(el, type, title, text) {
+  el.className = `feedback ${type} show`;
+  el.innerHTML = `<strong>${title}</strong>${text}`;
+}
+
+function recordAnswer(qId, result) {
+  if (answered[qId]) return;
+  answered[qId] = result;
+  if (result === 'correct') scores.correct++;
+  else if (result === 'partial') scores.partial++;
+  else scores.wrong++;
+
+  updateUI();
+}
+
+function updateUI() {
+  const total = Object.keys(answered).length;
+  document.getElementById('progressText').textContent = `${total} / ${TOTAL_QUESTIONS}`;
+  document.getElementById('correctCount').textContent = scores.correct;
+  document.getElementById('wrongCount').textContent = scores.wrong;
+  document.getElementById('progressBar').style.width = `${(total / TOTAL_QUESTIONS) * 100}%`;
+
+  if (total >= TOTAL_QUESTIONS) {
+    document.getElementById('finalSubmitBtn').disabled = false;
+    document.querySelector('.instruction-note').textContent = '¡Completaste el taller! Revisa tus resultados.';
+  }
+}
+
+function showResults() {
+  document.getElementById('finalSubmitWrap').style.display = 'none';
+  const resultsEl = document.getElementById('finalResults');
+  resultsEl.classList.add('show');
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const pct = Math.round(((scores.correct + scores.partial * 0.5) / TOTAL_QUESTIONS) * 100);
+  document.getElementById('resultScore').textContent = `${pct}%`;
+
+  document.getElementById('resultBreakdown').innerHTML = `
+    <div class="rb-item"><div class="rb-num g">${scores.correct}</div><div class="rb-label">Correctas</div></div>
+    <div class="rb-item"><div class="rb-num o">${scores.partial}</div><div class="rb-label">Parciales</div></div>
+    <div class="rb-item"><div class="rb-num r">${scores.wrong}</div><div class="rb-label">Incorrectas</div></div>
+  `;
+
+  let msg, sub;
+  if (pct >= 85) {
+    msg = '🏆 ¡Excelente desempeño, Guardián de la Calidad!';
+    sub = 'Dominas los conceptos clave de inocuidad alimentaria. Tu compromiso protege a nuestros clientes y a sus familias. ¡Sigue así!';
+    resultsEl.querySelector('.result-card').style.borderColor = 'var(--correct)';
+  } else if (pct >= 65) {
+    msg = '👍 Buen trabajo, hay áreas por reforzar.';
+    sub = 'Tienes una base sólida, pero repasa los temas donde tuviste errores. Recuerda: en inocuidad cada detalle cuenta.';
+    resultsEl.querySelector('.result-card').style.borderColor = 'var(--orange)';
+  } else {
+    msg = '📚 Necesitas reforzar los conceptos de ETA.';
+    sub = 'Te recomendamos revisar el material de capacitación y repetir el taller. La inocuidad es responsabilidad de todos en BREAD ART.';
+    resultsEl.querySelector('.result-card').style.borderColor = 'var(--wrong)';
+  }
+
+  document.getElementById('resultMessage').textContent = msg;
+  document.getElementById('resultSub').textContent = sub;
+}
+
+function retryQuiz() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => location.reload(), 400);
+}
+</script>
+
+</body>
+</html>
